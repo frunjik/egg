@@ -1,0 +1,68 @@
+<body id="main">
+<style>
+body {
+    background-color: gray;
+    font-family: "Tahoma", "Times New Roman", Georgia, Serif;
+}
+</style>
+<button id="load" onclick="load()">Load</button>
+<input id="name" style="width: 563" value="index.html">
+<button id="save" onclick="save()">Save</button>
+<button id="goto" onclick="goto()">Goto</button>
+<span id="stamp"></span>
+<br>
+<textarea id="code" rows="80" cols="120"></textarea>
+
+<script type="text/javascript">
+
+function elem(id) { return document.querySelector(id); }
+function read(id,name) { return elem(id)[name]; }
+function write(id,name,value) { elem(id)[name] = value; }
+
+load();
+
+function goto() {
+    var host = "http://localhost:8124/" + read('#name','value');
+    window.location.assign(host);
+}
+function load() {
+    load_document(read('#name','value'));
+}
+function save() {
+    var data = read('#code','value');
+    save_document(read('#name','value'), data);
+}
+
+function save_document(name, data) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                write('#stamp', 'innerHTML', new Date().toLocaleTimeString());
+            }
+            else {
+                alert(this.status);
+            }
+        }
+    };
+    xhttp.open("POST", 'api/files/put?name=' + name, true);
+    xhttp.send(data);
+}
+
+function load_document(name) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                write('#code', 'value', this.responseText);
+            }
+            else {
+                alert(this.status);
+            }
+        }
+    };
+    xhttp.open("GET", 'api/files/get?name=' + name + '&stamp=' + (new Date()), true);
+    xhttp.send();
+}
+</script>
+</body>
